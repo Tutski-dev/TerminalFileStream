@@ -47,8 +47,8 @@ int main(int argc, char** argv){
         tcp::socket socket(io);
         acceptor.accept(socket);
         try{
-            int fileSize;
-            socket.receive(boost::asio::buffer(&fileSize, sizeof(int)));
+            uint64_t fileSize;
+            socket.receive(boost::asio::buffer(&fileSize, sizeof(uint64_t)));
             int bytes_read = 0;
             while (bytes_read < fileSize){
                 uint8_t byte;
@@ -102,22 +102,19 @@ int main(int argc, char** argv){
         }
         try{
             file.seekg(0, std::ios::end);
-            int fileSize = file.tellg();
+            uint64_t fileSize = file.tellg();
+            std::cout << fileSize << " Bytes to send" << std::endl;
             file.seekg(0);
-            socket.send(boost::asio::buffer(&fileSize, sizeof(int)));
-            int percentage_1 = (int)fileSize/100;
+            socket.send(boost::asio::buffer(&fileSize, sizeof(uint64_t)));
+            int percentage_1 = fileSize/100;
             int bytes_sent = 0;
-            int percentage = 0;
-            while(1){
+            while(bytes_sent < fileSize){
                 uint8_t byte = file.get();
-                if (file.eof()){
-                    break;
-                }
                 socket.send(boost::asio::buffer(&byte, sizeof(byte)));
                 bytes_sent++;
                 if (bytes_sent % percentage_1 == 0){
-                    std::cout << percentage << "%" << std::endl;
-                    percentage++;
+                    double current_percentage = 100 * (double)bytes_sent/fileSize;
+                    std::cout << current_percentage << "%" << std::endl;
                 }
             }
         }
