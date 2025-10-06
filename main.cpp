@@ -49,7 +49,7 @@ int main(int argc, char** argv){
         try{
             uint64_t fileSize;
             socket.receive(boost::asio::buffer(&fileSize, sizeof(uint64_t)));
-            int bytes_read = 0;
+            uint64_t bytes_read = 0;
             while (bytes_read < fileSize){
                 uint8_t byte;
                 socket.receive(boost::asio::buffer(&byte, 1));
@@ -106,8 +106,8 @@ int main(int argc, char** argv){
             std::cout << fileSize << " Bytes to send" << std::endl;
             file.seekg(0);
             socket.send(boost::asio::buffer(&fileSize, sizeof(uint64_t)));
-            int percentage_1 = fileSize/100;
-            int bytes_sent = 0;
+            uint64_t percentage_1 = fileSize/100;
+            uint64_t bytes_sent = 0;
             while(bytes_sent < fileSize){
                 uint8_t byte = file.get();
                 socket.send(boost::asio::buffer(&byte, sizeof(byte)));
