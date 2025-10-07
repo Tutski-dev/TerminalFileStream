@@ -3,6 +3,8 @@ A program that allows sending file from the terminal.
 
 When it starts, It will show the numbers of bytes to send; and then the percentage after the 1st percent is sent.
 
+The data sent is not encrypted ! Don't send personal information using this program !
+
 ---
 **Compilation**
 
