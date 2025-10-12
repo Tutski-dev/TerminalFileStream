@@ -1,8 +1,27 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <fstream>
+#include <chrono>
+#include <thread>
+#include <mutex>
 
 using boost::asio::ip::tcp;
+std::mutex mtx;
+
+void show_progress(uint64_t* bytes_sent, uint64_t* bytes_sent_during_second, uint64_t* fileSize){
+    std::chrono::time_point second_start = std::chrono::steady_clock::now();
+    while (*bytes_sent < *fileSize){
+        if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - second_start).count() == 10){
+            mtx.lock();
+            second_start = std::chrono::steady_clock::now();
+            double current_percentage = 100 * (double)*bytes_sent/ *fileSize;
+            std::cout << current_percentage << "%" <<  " speed: " << (double)*bytes_sent_during_second/1000/10 << " kB/s" << std::endl;
+            *bytes_sent_during_second = 0;
+            mtx.unlock();
+        }
+    }
+
+}
 
 int main(int argc, char** argv){
     if (argc == 1 or argc > 5){
@@ -106,17 +125,22 @@ int main(int argc, char** argv){
             std::cout << fileSize << " Bytes to send" << std::endl;
             file.seekg(0);
             socket.send(boost::asio::buffer(&fileSize, sizeof(uint64_t)));
-            uint64_t percentage_1 = fileSize/100;
+            std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+            std::chrono::steady_clock::time_point second_start = std::chrono::steady_clock::now();
+            boost::
             uint64_t bytes_sent = 0;
+            uint64_t bytes_sent_during_second = 0;
+            std::thread thread(show_progress, &bytes_sent, &bytes_sent_during_second, &fileSize);
             while(bytes_sent < fileSize){
                 uint8_t byte = file.get();
                 socket.send(boost::asio::buffer(&byte, sizeof(byte)));
+                mtx.lock();
                 bytes_sent++;
-                if (bytes_sent % percentage_1 == 0){
-                    double current_percentage = 100 * (double)bytes_sent/fileSize;
-                    std::cout << current_percentage << "%" << std::endl;
-                }
+                bytes_sent_during_second++;
+                mtx.unlock();
+
             }
+            std::cout << "Finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count() << " !" << std::endl;
         }
         catch(std::exception& e){
             std::cerr << "Error sending file ! : " << e.what() << std::endl;
