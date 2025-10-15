@@ -8,7 +8,11 @@ The data sent is not encrypted ! Don't send personal information using this prog
 ---
 **Compilation**
 
-use g++ or another compiler on main.cpp
+use g++ or another compiler on main.cpp.
+
+You can also use cmake to generate build files.
+
+You can also download precompiled binaries in the Releases.
 
 ---
 
