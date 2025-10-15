@@ -41,7 +41,7 @@ jobs:
       run: ctest -C ${{env.BUILD_TYPE}}
 
     - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v5.0.0
       with:
         name: build-files
         path: build/
